@@ -1,6 +1,6 @@
 ---
 title: 欢迎来到次元世界：简单几步串流入坑VRChat
-published: 2025-10-14
+published: 2025-10-13
 pinned: false
 description: 使用一部 VR头显 + 一台PC，带你进入VRChat的世界.
 tags: [VRCHat]

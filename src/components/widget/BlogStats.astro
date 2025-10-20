@@ -7,7 +7,7 @@ const posts = await getCollection('posts');
 const postCount = posts.length;
 const tags = new Set();
 const categories = new Set();
-let totalWords = 0;
+let totalChars = 0;
 
 posts.forEach(post => {
   if (post.data.tags) {
@@ -19,11 +19,12 @@ posts.forEach(post => {
     categories.add(post.data.category);
   }
   if (post.body) {
-    totalWords += post.body.split(/\s+/).length;
+    // 以“字数”为单位：移除所有空白字符后计算长度，适配中文内容
+    totalChars += post.body.replace(/\s+/g, '').length;
   }
 });
 
-const totalWordsInWan = (totalWords / 10000).toFixed(1);
+const totalCharsInWan = (totalChars / 10000).toFixed(1);
 ---
 
 <link
@@ -97,7 +98,7 @@ const totalWordsInWan = (totalWords / 10000).toFixed(1);
       <span class="material-symbols-rounded">edit</span>
       <div>
         <div class="text-sm">总字数</div>
-        <div class="text-lg font-semibold">{totalWordsInWan} 万</div>
+        <div class="text-lg font-semibold">{totalCharsInWan} 万</div>
       </div>
     </div>
 
@@ -113,23 +114,37 @@ const totalWordsInWan = (totalWords / 10000).toFixed(1);
 </WidgetLayout>
 
 <script>
+  const startTime = new Date('2025-10-09T00:00:00+08:00');
+
   function updateRunningTime() {
-    const startTime = new Date('2025-10-09T00:00:00+08:00');
     const now = new Date();
     const diff = now.getTime() - startTime.getTime();
-
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-    const runningTime = `${d} 天 ${h} 时 ${m} 分 ${s} 秒`;
-    const runningTimeElement = document.getElementById('running-time');
-    if (runningTimeElement) {
-      runningTimeElement.innerHTML = runningTime;
-    }
+    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((diff / (1000 * 60)) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+    const el = document.getElementById('running-time');
+    if (el) el.textContent = `${d} 天 ${h} 时 ${m} 分 ${s} 秒`;
   }
 
-  setInterval(updateRunningTime, 1000);
-  updateRunningTime();
+  function startRunningTimeUpdater() {
+    // 防止重复启动计时器
+    if (window['__mizukiRunningTimeTimer']) {
+      clearInterval(window['__mizukiRunningTimeTimer']);
+    }
+    updateRunningTime();
+    window['__mizukiRunningTimeTimer'] = setInterval(updateRunningTime, 1000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startRunningTimeUpdater);
+  } else {
+    startRunningTimeUpdater();
+  }
+
+  if (typeof window !== 'undefined' && window['swup'] && window['swup'].hooks) {
+    window['swup'].hooks.on('content:replace', () => {
+      setTimeout(startRunningTimeUpdater, 50);
+    });
+  }
 </script>

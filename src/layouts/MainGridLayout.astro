@@ -169,6 +169,17 @@ const shouldEnableTransparency =
 const transparentClass = shouldEnableTransparency
 	? "wallpaper-transparent"
 	: "";
+
+// 艺术家卡片位置样式（使用像素偏移更精确）
+const artistCardPositionStyle = (() => {
+	const p = siteConfig.banner.artistCard?.position || "bottom-right";
+	const offsetX = siteConfig.banner.artistCard?.offset?.x ?? 52; // px
+	const offsetY = siteConfig.banner.artistCard?.offset?.y ?? 30; // px
+	if (p === "bottom-left") return `bottom: ${offsetY}px; left: ${offsetX}px;`;
+	if (p === "top-right") return `top: ${offsetY}px; right: ${offsetX}px;`;
+	if (p === "top-left") return `top: ${offsetY}px; left: ${offsetX}px;`;
+	return `bottom: ${offsetY}px; right: ${offsetX}px;`;
+})();
 ---
 
 <Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle} postSlug={postSlug}>
@@ -296,6 +307,30 @@ const transparentClass = shouldEnableTransparency
             </div>
         </div>
     )}
+
+    <!-- Artist attribution card -->
+    {siteConfig.banner.artistCard?.enable && (
+        <a 
+            href={siteConfig.banner.artistCard?.url || undefined} 
+            id="banner-artist-card" 
+            target={siteConfig.banner.artistCard?.url ? "_blank" : undefined}
+            rel={siteConfig.banner.artistCard?.url ? "noopener" : undefined}
+            class:list={[`group absolute z-20 hidden md:flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/50 hover:bg-white/60 backdrop-blur-[65px] border border-white/20 shadow-lg hover:shadow-xl text-black transition-transform duration-300 ease-out hover:-translate-y-1`]}
+            style={artistCardPositionStyle}
+        >
+            <div class="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center overflow-hidden shrink-0">
+                {siteConfig.banner.artistCard?.avatar ? (
+                    <ImageWrapper src={siteConfig.banner.artistCard.avatar} alt="Artist avatar" class="w-full h-full object-cover rounded-full" />
+                ) : (
+                    <Icon name="material-symbols:brush" class="text-blue-600 text-xl"></Icon>
+                )}
+            </div>
+            <div class="leading-tight">
+                <div class="text-sm font-medium">画师：{siteConfig.banner.artistCard?.title || siteConfig.banner.credit.text}</div>
+                {siteConfig.banner.artistCard?.subtitle && <div class="text-xs opacity-90">作品集：{siteConfig.banner.artistCard.subtitle}</div>}
+            </div>
+        </a>
+    )}
     
     <!-- Water waves effect -->
     <div class="waves absolute -bottom-[1px] h-[10vh] max-h-[9.375rem] min-h-[3.125rem] w-full md:h-[15vh]" id="header-waves" style="transform: translateZ(0); will-change: fill;">
@@ -355,18 +390,6 @@ const transparentClass = shouldEnableTransparency
     <div class="relative max-w-[var(--page-width)] mx-auto pointer-events-auto">
         <div id="main-grid" class={`transition duration-700 w-full left-0 right-0 grid ${gridCols} grid-rows-[auto_1fr_auto] lg:grid-rows-[auto] mx-auto gap-4 px-0 md:px-4 ${!mobileShowSidebar ? 'mobile-no-sidebar' : ''}`}
         >
-            <!-- Banner image credit -->
-            {hasBannerCredit && <a href={siteConfig.banner.credit.url} id="banner-credit" target="_blank" rel="noopener" aria-label="Visit image source"
-                                   class:list={["group onload-animation transition-all absolute flex justify-center items-center rounded-full " +
-                                   "px-3 right-4 -top-[3.25rem] bg-black/60 hover:bg-black/70 h-9", {"hover:pr-9 active:bg-black/80": hasBannerLink}]}
-            >
-                <Icon class="text-white/75 text-[1.25rem] mr-1" name="material-symbols:copyright-outline-rounded" ></Icon>
-                <div class="text-white/75 text-xs">{siteConfig.banner.credit.text}</div>
-                <Icon class:list={["transition absolute text-[oklch(0.75_0.14_var(--hue))] right-4 text-[0.75rem] opacity-0",
-                    {"group-hover:opacity-100": hasBannerLink}]}
-                      name="fa6-solid:arrow-up-right-from-square">
-                </Icon>
-            </a>}
 
 
             {(mobileShowSidebar || tabletShowSidebar || desktopShowSidebar) && <SideBar class={`${sidebarClass} ${transparentClass}`} headings={headings}></SideBar>}

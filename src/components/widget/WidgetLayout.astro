@@ -21,13 +21,6 @@ const className = Astro.props.class;
     <div id={id} class:list={["collapse-wrapper px-4 overflow-hidden", {"collapsed": isCollapsed}]}>
         <slot></slot>
     </div>
-    {isCollapsed && <div class="expand-btn px-4 -mb-2">
-        <button class="btn-plain rounded-lg w-full h-9">
-            <div class="text-[var(--primary)] flex items-center justify-center gap-2 -translate-x-2">
-                <Icon name="material-symbols:more-horiz" class="text-[1.75rem]"></Icon> {i18n(I18nKey.more)}
-            </div>
-        </button>
-    </div>}
 </widget-layout>
 
 <style define:vars={{ collapsedHeight }}>
@@ -45,12 +38,11 @@ const className = Astro.props.class;
                 return;
 
             const id = this.dataset.id;
-            const btn = this.querySelector('.expand-btn');
             const wrapper = this.querySelector(`#${id}`)
-            btn!.addEventListener('click', () => {
-                wrapper!.classList.remove('collapsed');
-                btn!.classList.add('hidden');
-            })
+            if (wrapper) {
+                // 直接展开：不再需要按钮
+                wrapper.classList.remove('collapsed');
+            }
         }
     }
 

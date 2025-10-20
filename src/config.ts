@@ -112,6 +112,17 @@ export const siteConfig: SiteConfig = {
 			url: "", // （可选）原始艺术品或艺术家页面的 URL 链接
 		},
 
+		// 新增：主页横幅上的画师信息卡片
+		artistCard: {
+			enable: true,
+			title: "九钱算六卦",
+			subtitle: "今汐·桃夭灼灼",
+			avatar: "https://p.ipic.vip/otmgu6.jpg",
+			url: "https://www.pixiv.net/",
+			position: "bottom-right",
+			offset: { x: 40, y: 70 },
+		},
+
 		navbar: {
 			transparentMode: "semifull", // 导航栏透明模式："semi" 半透明加圆角，"full" 完全透明，"semifull" 动态透明
 		},

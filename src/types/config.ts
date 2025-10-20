@@ -78,6 +78,16 @@ export type SiteConfig = {
 			text: string;
 			url?: string;
 		};
+		// 新增：Banner 艺术家信息卡片配置（用于在壁纸上显示署名）
+		artistCard?: {
+			enable: boolean;
+			title?: string; // 画师名
+			subtitle?: string; // 作品集/系列名
+			avatar?: string; // 头像或图标路径（可选）
+			url?: string; // 跳转链接
+			position?: "bottom-right" | "bottom-left" | "top-right" | "top-left"; // 位置
+			offset?: { x?: number; y?: number }; // 位置偏移（px），用于微调到指定区域
+		};
 		navbar?: {
 			transparentMode?: "semi" | "full" | "semifull"; // 导航栏透明模式
 		};
