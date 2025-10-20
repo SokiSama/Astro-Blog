@@ -1,15 +1,17 @@
 ---
 
 import { getEntry, render } from "astro:content";
+import { title } from "node:process";
 import Markdown from "@components/misc/Markdown.astro";
+import TwikooComment from "../components/comment/Twikoo.astro";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
-import TwikooComment from '../components/comment/Twikoo.astro';
-import { title } from "node:process";
+
 const friendsPost = await getEntry("spec", "friends");
 //twikko envid
-const envId = "https://sweet-moonbeam-d0178d.netlify.app/.netlify/functions/twikoo";
+const envId =
+	"https://sweet-moonbeam-d0178d.netlify.app/.netlify/functions/twikoo";
 if (!friendsPost) {
 	throw new Error("friends page content not found");
 }
@@ -18,52 +20,58 @@ const { Content } = await render(friendsPost);
 const items = [
 	{
 		title: "鈴奈咲桜のBlog",
-        imgurl: "https://q2.qlogo.cn/headimg_dl?dst_uin=2731443459&spec=5",
-        desc: "愛することを忘れないで",
-        siteurl: "https://blog.sakura.ink",
-        tags: ["很厉害的开发者"],
+		imgurl: "https://q2.qlogo.cn/headimg_dl?dst_uin=2731443459&spec=5",
+		desc: "愛することを忘れないで",
+		siteurl: "https://blog.sakura.ink",
+		tags: ["很厉害的开发者"],
 	},
-    {
-        title: "小三月",
-        imgurl: "https://gravatar.loli.net/avatar/1741ba4d7382ef4f8a556fdf3d88a4cf?s=300",
-        desc: "喵！这里是三月七",
-        siteurl: "https://blog.nanoka.moe/links",
-        tags: ["超绝可爱，又带点小傲娇的三月七酱"],
-    },
-    {
-        title: "熊熊",
-        imgurl: "https://cynosura.one/img/profile-avatar.webp",
-        desc: "Trying to light up the dark.",
-        siteurl: "https://cynosura.one/",
-        tags: ["故人，友人，我的启航灯"],
-    },
+	{
+		title: "小三月",
+		imgurl:
+			"https://gravatar.loli.net/avatar/1741ba4d7382ef4f8a556fdf3d88a4cf?s=300",
+		desc: "喵！这里是三月七",
+		siteurl: "https://blog.nanoka.moe/links",
+		tags: ["超绝可爱，又带点小傲娇的三月七酱"],
+	},
+	{
+		title: "熊熊",
+		imgurl: "https://cynosura.one/img/profile-avatar.webp",
+		desc: "Trying to light up the dark.",
+		siteurl: "https://cynosura.one/",
+		tags: ["故人，友人，我的启航灯"],
+	},
 
-    {
-         title: "Hoyue の 自留地",
-         siteurl: "https://hoyue.fun",
-         imgurl: "https://hoyue.fun/assets/icons/avatar.jpg",
-         desc: "这里的一切都有始有终，却能容纳所有的不期而遇和久别重逢。",
-         tags: ["SummerPockets"],
-    },
+	{
+		title: "Hoyue の 自留地",
+		siteurl: "https://hoyue.fun",
+		imgurl: "https://hoyue.fun/assets/icons/avatar.jpg",
+		desc: "这里的一切都有始有终，却能容纳所有的不期而遇和久别重逢。",
+		tags: ["SummerPockets"],
+	},
 
-    {
-        title: "Clementine (aka Clem) ",
-        siteurl: "https://blog.hly0928.com/",
-        imgurl: "https://friends.ichr.me/img/blog.hly0928.com.png",
-        desc: "悟已往之不諫，知來者之可追",
-        tags: ["Stevens 姐姐的 Blog"],
+	{
+		title: "Clementine (aka Clem) ",
+		siteurl: "https://blog.hly0928.com/",
+		imgurl: "https://friends.ichr.me/img/blog.hly0928.com.png",
+		desc: "悟已往之不諫，知來者之可追",
+		tags: ["Stevens 姐姐的 Blog"],
+	},
 
-    },
+	{
+		title: "ATao-Blog",
+		siteurl: "https://blog.atao.cyou",
+		imgurl: "https://cdn.atao.cyou/Web/Avatar.png",
+		desc: "做自己喜欢的事",
+		tags: ["自动化工程师desu"],
+	},
 
-    {
-        title:"ATao-Blog",
-        siteurl: "https://blog.atao.cyou",
-        imgurl: "https://cdn.atao.cyou/Web/Avatar.png",
-        desc: "做自己喜欢的事",
-        tags: ["自动化工程师desu"],
-
-    }
-	
+	{
+		title: "ZL Asica",
+		siteurl: "https://zla.pub/",
+		imgurl: "https://gravatar.zla.app/avatar/me",
+		desc: "月亮不抱你，星星会落在你怀里✨🌙",
+		tags: ["月亮不抱你，星星会落在你怀里✨🌙"],
+	},
 ];
 
 function shuffleArray(array) {
