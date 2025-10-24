@@ -68,7 +68,7 @@ draft: false
 
 在国内社交媒体上 IP 定位也是中国澳门（以小黑盒为例，现在已经不用了）
 
-![image.png](https://p.ipic.vip/159c2596-9f86-4f31-b1b9-c3b6aa115d6f.png)
+![image.png](https://p.ipic.vip/y7c2n8.png)
 
 后面我就把卡插在我的 S24 上了。出门拍个生活照弥补一下iPhone拍照过于素的问题，同时还能有网络传给 iPhone 发到社交网络上。
 
