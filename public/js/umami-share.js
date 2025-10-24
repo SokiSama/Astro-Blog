@@ -45,19 +45,19 @@
   }
 
   /**
-   * 获取特定页面的统计数据
+   * 获取特定页面的统计数据（按 URL 聚合）
    * @param {string} baseUrl - Umami Cloud API基础URL
    * @param {string} apiKey - API密钥
    * @param {string} websiteId - 网站ID
    * @param {string} urlPath - 页面路径
    * @param {number} startAt - 开始时间戳
    * @param {number} endAt - 结束时间戳
-   * @returns {Promise<object>} 页面统计数据
+   * @returns {Promise<object>} 页面统计数据 { pageviews: number, visitors: number }
    */
   async function fetchPageStats(baseUrl, apiKey, websiteId, urlPath, startAt = 0, endAt = Date.now()) {
-    const statsUrl = `${baseUrl}/v1/websites/${websiteId}/stats?startAt=${startAt}&endAt=${endAt}&url=${encodeURIComponent(urlPath)}`;
-    
-    const res = await fetch(statsUrl, {
+    // 使用 metrics 接口按 URL 聚合，返回各 URL 的 pageviews
+    const metricsUrl = `${baseUrl}/v1/websites/${websiteId}/metrics?startAt=${startAt}&endAt=${endAt}&type=url`;
+    const res = await fetch(metricsUrl, {
       headers: {
         'x-umami-api-key': apiKey
       }
@@ -67,7 +67,30 @@
       throw new Error('获取页面统计数据失败');
     }
     
-    return await res.json();
+    const data = await res.json(); // 形如 [{ x: '/posts/foo', y: 123 }, ...]
+    const normalize = (p) => {
+      try {
+        return decodeURIComponent(p);
+      } catch {
+        return p;
+      }
+    };
+    const target = normalize(urlPath);
+    const candidates = new Set([target, target.replace(/\/$/, '')]);
+    let pageviews = 0;
+    if (Array.isArray(data)) {
+      for (const item of data) {
+        if (item && typeof item.x === 'string') {
+          const x = normalize(item.x);
+          if (candidates.has(x) || candidates.has(x.replace(/\/$/, ''))) {
+            pageviews = Number(item.y || 0);
+            break;
+          }
+        }
+      }
+    }
+    // visitors 按 URL 无官方 v1 统计，暂设为 0
+    return { pageviews, visitors: 0 };
   }
 
   /**

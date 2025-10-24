@@ -6,7 +6,7 @@ import "@fontsource/roboto/700.css";
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import MusicPlayer from "@components/widget/MusicPlayer.svelte";
 import Pio from "@components/widget/Pio.svelte"; // 使用 Svelte 版本的 Pio 组件
-import { profileConfig, siteConfig } from "@/config";
+import { commentConfig, profileConfig, siteConfig } from "@/config";
 import { widgetConfigs } from "../config";
 import { umamiConfig } from "../config.ts";
 import {
@@ -16,8 +16,8 @@ import {
 	DARK_MODE,
 	DEFAULT_THEME,
 	LIGHT_MODE,
-	SYSTEM_MODE,
 	PAGE_WIDTH,
+	SYSTEM_MODE,
 } from "../constants/constants.ts";
 import { defaultFavicons } from "../constants/icon";
 import type { Favicon, SakuraConfig } from "../types/config";
@@ -234,6 +234,9 @@ const umamiScripts = umamiConfig.scripts || ""; // 获取Umami scripts配置
 
 		<!-- Umami Analytics -->
 		{umamiEnabled && umamiScripts && <Fragment set:html={umamiScripts} />}
+
+		<!-- 全局加载 Twikoo 库，确保 Swup 页面切换后仍可用 -->
+		<script is:inline src="/assets/js/twikoo.all.min.js"></script>
 
 </head>
 	<body class=" min-h-screen " class:list={[
@@ -648,7 +651,7 @@ const umamiScripts = umamiConfig.scripts || ""; // 获取Umami scripts配置
 }
 </style>
 
-<script type="module">
+<script type="module" define:vars={{ envId: commentConfig.twikoo?.envId }}>
 import { animationManager } from '../utils/animation-utils';
 import 'overlayscrollbars/overlayscrollbars.css';
 import {
@@ -717,7 +720,7 @@ function setClickOutsideToClose(panel: string, ignores: string[]) {
 	document.addEventListener("click", event => {
 		let panelDom = document.getElementById(panel);
 		let tDom = event.target;
-		if (!(tDom instanceof Node)) return;		// Ensure the event target is an HTML Node
+		if (!(tDom instanceof Node)) return; // Ensure the event target is an HTML Node
 		for (let ig of ignores) {
 			let ie = document.getElementById(ig)
 			if (ie == tDom || (ie?.contains(tDom))) {
@@ -810,6 +813,42 @@ function showBanner() {
 		if (carousel) {
 			// 立即初始化轮播，移除延迟以改善流畅性
 			initCarousel();
+		}
+	});
+}
+
+// 回到主页时强制重新加载头图（重置动画状态并重新初始化轮播）
+function reloadHomeBanner() {
+	if (!siteConfig.banner.enable) return;
+	const isHome = document.body.classList.contains('lg:is-home');
+	if (!isHome) return;
+
+	requestAnimationFrame(() => {
+		// 确保 wrapper 可见
+		const bannerWrapper = document.getElementById('banner-wrapper');
+		if (bannerWrapper) {
+			bannerWrapper.classList.remove('mobile-hide-banner');
+		}
+
+		// 单图：重置动画并重新展示
+		const banner = document.getElementById('banner');
+		if (banner) {
+			banner.classList.add('opacity-0', 'scale-105');
+			setTimeout(() => {
+				banner.classList.remove('opacity-0', 'scale-105');
+				banner.classList.add('opacity-100');
+			}, 50);
+		}
+
+		// 轮播：重置各项状态，然后重新初始化
+		const carousel = document.getElementById('banner-carousel');
+		if (carousel) {
+			const items = carousel.querySelectorAll('.carousel-item');
+			items.forEach((item) => {
+				item.classList.add('opacity-0', 'scale-110');
+				item.classList.remove('opacity-100', 'scale-100');
+			});
+			try { initCarousel(); } catch (e) {}
 		}
 	});
 }
@@ -974,7 +1013,6 @@ function initCarousel() {
 
 
 
-
 const setup = () => {
 	// TODO: temp solution to change the height of the banner
 /*
@@ -1042,6 +1080,30 @@ const setup = () => {
 				}
 			}
 		}
+
+		// Twikoo：在内容替换后尝试初始化评论（确保库已加载且容器存在）
+		setTimeout(() => {
+			const commentEl = document.getElementById('tcomment');
+			const tw = (window as any).twikoo || (window as any).twikoo_min || (window as any).twikoo_all;
+			if (commentEl && tw) {
+				try {
+					commentEl.innerHTML = '';
+					const pathname = window.location.pathname;
+					const normalizedPath = pathname.endsWith('/') && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+					tw.init({
+						envId: "${commentConfig.twikoo?.envId ?? ''}",
+						el: '#tcomment',
+						path: normalizedPath
+					}).then(() => {
+						console.log('[Twikoo] content:replace 初始化完成');
+					}).catch((error) => {
+						console.error('[Twikoo] content:replace 初始化失败:', error);
+					});
+				} catch (error) {
+					console.error('[Twikoo] content:replace 初始化异常:', error);
+				}
+			}
+		}, 250);
 	})
 	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
 		// change banner height immediately when a link is clicked
@@ -1107,7 +1169,7 @@ const setup = () => {
 		if (heightExtend) {
 			heightExtend.classList.remove('hidden')
 		}
-
+		
 		// Hide the TOC while scrolling back to top
 		let toc = document.getElementById('toc-wrapper');
 		if (toc) {
@@ -1120,6 +1182,12 @@ const setup = () => {
 		if (heightExtend) {
 			heightExtend.classList.remove('hidden')
 		}
+		
+		// 保证 Banner 在页面视图稳定后重新展示（含轮播）
+		try { showBanner(); } catch (e) {}
+		
+		// 回到主页时强制重新加载头图 div
+		try { reloadHomeBanner(); } catch (e) {}
 		
 		// 确保页面滚动到顶部，特别是移动端banner关闭时
 		window.scrollTo({
@@ -1142,6 +1210,30 @@ const setup = () => {
 				window.dispatchEvent(new CustomEvent('theme-change'));
 			}, 50);
 		}
+		
+		// 在页面完全可见时初始化 Twikoo（更可靠的时机）
+		setTimeout(() => {
+			const commentEl = document.getElementById('tcomment');
+			const tw = (window as any).twikoo || (window as any).twikoo_min || (window as any).twikoo_all;
+			if (commentEl && tw) {
+				try {
+					commentEl.innerHTML = '';
+					const pathname = window.location.pathname;
+					const normalizedPath = pathname.endsWith('/') && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+					tw.init({
+						envId: "${commentConfig.twikoo?.envId ?? ''}",
+						el: '#tcomment',
+						path: normalizedPath
+					}).then(() => {
+						console.log('[Twikoo] page:view 初始化完成');
+					}).catch((error) => {
+						console.error('[Twikoo] page:view 初始化失败:', error);
+					});
+				} catch (error) {
+					console.error('[Twikoo] page:view 初始化异常:', error);
+				}
+			}
+		}, 350);
 		
 		// 检查当前页面是否为文章页面，如果是则触发自定义事件用于初始化评论系统
 		setTimeout(() => {

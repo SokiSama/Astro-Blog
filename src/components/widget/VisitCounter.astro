@@ -2,8 +2,8 @@
 // src/components/widget/VisitCounter.astro
 import { umamiConfig } from "../../config";
 
-// 从配置中提取 shareId、baseUrl 和网站 ID
-const shareId = umamiConfig.shareId;
+// 从配置中提取 apiKey、baseUrl 和网站 ID
+const apiKey = umamiConfig.apiKey;
 const baseUrl = umamiConfig.baseUrl;
 const websiteId = umamiConfig.scripts.match(/data-website-id="([^"]+)"/)?.[1];
 ---
@@ -15,10 +15,10 @@ const websiteId = umamiConfig.scripts.match(/data-website-id="([^"]+)"/)?.[1];
 )}
 
 {umamiConfig.enabled && (
-  <script define:vars={{ baseUrl, shareId, websiteId }}>
+  <script define:vars={{ baseUrl, apiKey, websiteId }}>
     async function updateVisitCount() {
       try {
-        const stats = await getUmamiWebsiteStats(baseUrl, shareId, websiteId);
+        const stats = await getUmamiWebsiteStats(baseUrl, apiKey, websiteId);
         const total = (stats?.pageviews || 0);
         const el = document.getElementById('visit-count-display');
         if (el) el.textContent = String(total);
