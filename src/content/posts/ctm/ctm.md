@@ -1,6 +1,6 @@
 ---
 title: CTM (中国电信澳门)自用体验
-published: 2025-10-20
+published: 2025-10-24
 pinned: false
 description: 稍微说一下中国电信澳门的使用体验。
 tags: [CTM,中国电信澳门]
